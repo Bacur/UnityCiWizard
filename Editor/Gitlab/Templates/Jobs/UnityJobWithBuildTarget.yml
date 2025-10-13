@@ -1,17 +1,23 @@
-{{include 'Jobs/AbstractJob'}}
-  <<: *unity
+{{include 'Jobs/AbstractJob'}}  
   stage: build
+  # resource_group: "{{job.unity_editor_target}}"
   variables:
     UCI_CFG_JOB_UNITY_MODULES: "{{job.unity_module}}"
     UCI_CFG_JOB_UNITY_EDITOR_TARGET: "{{job.unity_editor_target}}"
     UCI_CFG_JOB_UNITY_CONFIG_GUID: "{{config_guid}}"
     UCI_CFG_JOB_UNITY_INDEX: "{{for.index}}"
-  script:
+  script:                  
+    - *unity-import-section-start
+    - *check-environment-variables
+    - *unity-get-project-version
+    - *unity-check-install-editor
+    - *unity-check-install-modules
+    - *unity-apply-bee-workaround
+    - *unity-set-batch-mode-arguments
     - *unity-apply-job-call-arguments
-    - |-
-        echo -e "\e[96m\e[0Ksection_start:`date +%s`:import_section\r\e[0KStart importing project\e[0m"
+    - |-        
         "$UCI_VAR_UNITY_EDITOR_PATH""$UCI_ENV_UNITY_EXECUTABLE" $UCI_VAR_UNITY_BATCH_MODE_ARGUMENTS -buildTarget ${UCI_CFG_JOB_UNITY_EDITOR_TARGET}
-        echo -e "\e[96m\e[0Ksection_end:`date +%s`:exit_section\r\e[0K\e[0m"
+    - *unity-import-section-end        
   tags:
     - Unity
     - {{job.runner_tag}}

@@ -10,6 +10,7 @@ variables:
   
 .check-environment-variables: &check-environment-variables
   - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:check-environment-variables_section[collapsed=true]\r\e[0Kcheck-environment-variables\e[0m"  
     if [ -z "${UCI_ENV_UNITY_HUB_COMMAND}" ]; then
       echo "Variable UCI_ENV_UNITY_HUB_COMMAND is not set or empty"
       exit 1
@@ -30,13 +31,27 @@ variables:
       echo "Variable UCI_ENV_UNITY_SERIAL is not set or empty"
       exit 1
     fi
-  
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:check-environment-variables_section\r\e[0K\e[0m"
+
+.set_project_path: &set_project_path
+  - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:set_project_path_section[collapsed=true]\r\e[0Kset_project_path\e[0m"  
+    if [ "$UCI_CFG_PROJECT_PATH" == "." ]; then
+        UCI_VAR_UNITY_FULL_PROJECT_PATH=${PWD}
+    else
+        UCI_VAR_UNITY_FULL_PROJECT_PATH="${PWD}/${UCI_CFG_PROJECT_PATH}"
+    fi
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:set_project_path_section\r\e[0K\e[0m"
+
 .unity-get-project-version: &unity-get-project-version
   - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:unity-get-project-version_section[collapsed=true]\r\e[0Kunity-get-project-version\e[0m"  
     UCI_VAR_PROJECT_VERSION=$(awk '{for(i=1;i<=NF;i++){if($i~/([0-9A-Za-z]+(\.[0-9A-Za-z]+)+)/) {print $i;exit;}}}' $UCI_CFG_PROJECT_PATH/ProjectSettings/ProjectVersion.txt)
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:unity-get-project-version_section\r\e[0K\e[0m"
 
 .unity-check-install-editor: &unity-check-install-editor
   - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:&unity-check-install-editor_section[collapsed=true]\r\e[0Kunity-check-install-editor\e[0m"  
     UCI_VAR_UNITY_EDITOR_PATH=$("$UCI_ENV_UNITY_HUB_COMMAND" --headless editors -i | awk -v ver="$UCI_VAR_PROJECT_VERSION" '$0~ver{print}' | awk 'match($0,/installed at [^ ]*/){ print substr($0, RSTART + 13, RLENGTH)}')
     if [ -z "$UCI_VAR_UNITY_EDITOR_PATH" ]; then 
       UCI_VAR_INSTALL_LOCKFILE="/tmp/${UCI_VAR_PROJECT_VERSION}.lock"
@@ -55,9 +70,11 @@ variables:
       UCI_VAR_UNITY_EDITOR_PATH=$("$UCI_ENV_UNITY_HUB_COMMAND" --headless editors -i | awk -v ver="$UCI_VAR_PROJECT_VERSION" '$0~ver{print}' | awk 'match($0,/installed at [^ ]*/){ print substr($0, RSTART + 13, RLENGTH)}')
     fi
     echo "UCI_VAR_UNITY_EDITOR_PATH=$UCI_VAR_UNITY_EDITOR_PATH" >> $GITLAB_ENV
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:unity-check-install-editor_section\r\e[0K\e[0m"
     
 .unity-check-install-modules: &unity-check-install-modules
   - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:unity-check-install-modules_section[collapsed=true]\r\e[0Kunity-check-install-modules\e[0m"  
     if [ -n "$UCI_CFG_JOB_UNITY_MODULES" ]; then 
       UCI_VAR_INSTALL_LOCKFILE="/tmp/${UCI_VAR_PROJECT_VERSION}_${UCI_CFG_JOB_UNITY_MODULES}.lock"
       if [ ! -f "$UCI_VAR_INSTALL_LOCKFILE" ]; then
@@ -72,10 +89,20 @@ variables:
         done
       fi
     fi
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:unity-check-install-modules_section\r\e[0K\e[0m"
     
+.unity-import-section-start: &unity-import-section-start
+  - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:import_section\r\e[0KStart importing project\e[0m"  
+
+.unity-import-section-end: &unity-import-section-end
+  - |-
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:import_section\r\e[0K\e[0m" 
+
 #bee_backend workaround (https://discussions.unity.com/t/linux-editor-stuck-on-loading-because-of-bee_backend-w-workaround/854480/37)
 .unity-apply-bee-workaround: &unity-apply-bee-workaround
   - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:unity-apply-bee-workaround_section[collapsed=true]\r\e[0Kunity-apply-bee-workaround\e[0m"  
     UCI_VAR_UNITY_EDITOR_PARENT_PATH="$(dirname "$UCI_VAR_UNITY_EDITOR_PATH")"
     find $UCI_VAR_UNITY_EDITOR_PARENT_PATH -name 'bee_backend' -type f -print0 | 
     while IFS= read -r -d '' line; do 
@@ -99,9 +126,11 @@ variables:
         chmod +x "$UCI_VAR_BEE_EXECUTABLE"
       fi
     done
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:unity-apply-bee-workaround_section\r\e[0K\e[0m"
     
 .unity-set-batch-mode-arguments: &unity-set-batch-mode-arguments
   - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:unity-set-batch-mode-arguments_section[collapsed=true]\r\e[0Kunity-set-batch-mode-arguments\e[0m"  
     if [ "$UCI_CFG_PROJECT_PATH" == "." ]; then
       UCI_VAR_UNITY_FULL_PROJECT_PATH=${PWD}
     else
@@ -112,19 +141,15 @@ variables:
     echo 'UCI_VAR_UNITY_BATCH_MODE_ARGUMENTS="$UCI_VAR_UNITY_BATCH_MODE_ARGUMENT"' >> $GITLAB_ENV
     mkdir -p /tmp/unity_license/
     touch "/tmp/unity_license/license_job_$CI_JOB_ID"
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:unity-set-batch-mode-arguments_section\r\e[0K\e[0m"
 
 .unity-apply-job-call-arguments: &unity-apply-job-call-arguments
   - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:unity-apply-job-call-arguments_section[collapsed=true]\r\e[0Kunity-apply-job-call-arguments\e[0m"  
     UCI_VAR_UNITY_BATCH_MODE_ARGUMENTS="${UCI_VAR_UNITY_BATCH_MODE_ARGUMENTS} -quit -executeMethod CiWizard.Editor.CiConfig.Execute"
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:unity-apply-job-call-arguments_section\r\e[0K\e[0m"
 
 .unity: &unity
-  before_script:
-    - *check-environment-variables
-    - *unity-get-project-version
-    - *unity-check-install-editor
-    - *unity-check-install-modules
-    - *unity-apply-bee-workaround
-    - *unity-set-batch-mode-arguments
   after_script:
     - |-
       rm "/tmp/unity_license/license_job_$CI_JOB_ID"

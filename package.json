@@ -1,6 +1,6 @@
 {
   "name": "com.utkaka.ci-wizard",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "displayName": "CI Wizard",
   "description": "Editor for generating CI configs. At the moment it supports only Gitlab CI",
   "unity": "2020.1",
