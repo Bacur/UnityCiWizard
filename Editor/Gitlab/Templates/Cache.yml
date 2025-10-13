@@ -1,8 +1,59 @@
-cache:
-  key: {{job.cache.name}}
-  when: {{artifact_condition_to_string job.cache_when}}
-  policy: {{cache_policy_to_string job.cache_policy}}
-  paths:
+before_script:    
+  - |-    
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:cache_restore_section[collapsed=true]\r\e[0KCache restore\e[0m"   
+
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:set_project_path_section[collapsed=true]\r\e[0Kset_project_path\e[0m"  
+    if [ "$UCI_CFG_PROJECT_PATH" == "." ]; then
+        UCI_VAR_UNITY_FULL_PROJECT_PATH=${PWD}
+    else
+        UCI_VAR_UNITY_FULL_PROJECT_PATH="${PWD}/${UCI_CFG_PROJECT_PATH}"
+    fi
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:set_project_path_section\r\e[0K\e[0m"
+
+    if [ -z "${UCI_ENV_CACHE_PATH}" ]; then
+      UCI_ENV_CACHE_PATH="$HOME/uci-cache"
+    fi
     {{~ for path in job.cache.paths ~}}
-    - "$UCI_CFG_PROJECT_PATH/{{path~}}"
+    UCI_VAR_CACHE_FOLDER="$UCI_ENV_CACHE_PATH/$CI_PROJECT_PATH_SLUG/{{job.cache.name}}/{{path~}}"
+    mkdir -p "${UCI_VAR_CACHE_FOLDER}"
+
+    if [ -d "${UCI_VAR_CACHE_FOLDER}" ] && [ "$(ls -A "${UCI_VAR_CACHE_FOLDER}" 2>/dev/null | head -n1)" ]; then
+      mkdir -p "$UCI_VAR_UNITY_FULL_PROJECT_PATH/{{path~}}"/
+      cp -r "${UCI_VAR_CACHE_FOLDER}/"* "$UCI_VAR_UNITY_FULL_PROJECT_PATH/{{path~}}"/
+    fi
     {{~ end ~}}
+
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:cache_restore_section\r\e[0K\e[0m"
+after_script:
+  - |-
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:cache_save_section[collapsed=true]\r\e[0KCache save\e[0m"   
+
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:cache_save_set_project_path_section[collapsed=true]\r\e[0Kset_project_path\e[0m"  
+    if [ "$UCI_CFG_PROJECT_PATH" == "." ]; then
+        UCI_VAR_UNITY_FULL_PROJECT_PATH=${PWD}
+    else
+        UCI_VAR_UNITY_FULL_PROJECT_PATH="${PWD}/${UCI_CFG_PROJECT_PATH}"
+    fi
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:cache_save_set_project_path_section\r\e[0K\e[0m"
+
+    if [ -z "${UCI_ENV_CACHE_PATH}" ]; then
+      UCI_ENV_CACHE_PATH="$HOME/uci-cache"
+    fi
+
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:cache_old_clear_section[collapsed=true]\r\e[0KClear old cache\e[0m"          
+    if [ -n "${UCI_VAR_CACHE_FOLDER}" ] && [ "${UCI_VAR_CACHE_FOLDER}" != "/" ]; then
+      rm -rf "${UCI_VAR_CACHE_FOLDER}"
+      mkdir -p "${UCI_VAR_CACHE_FOLDER}"
+    fi
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:cache_old_clear_section\r\e[0K\e[0m"
+
+    {{~ for path in job.cache.paths ~}}
+    UCI_VAR_CACHE_FOLDER="$UCI_ENV_CACHE_PATH/$CI_PROJECT_PATH_SLUG/{{job.cache.name}}/{{path~}}"
+    mkdir -p "${UCI_VAR_CACHE_FOLDER}"
+
+    if [ -d "$UCI_VAR_UNITY_FULL_PROJECT_PATH/{{path~}}" ]; then
+      cp -r "$UCI_VAR_UNITY_FULL_PROJECT_PATH/{{path~}}/"* "${UCI_VAR_CACHE_FOLDER}"/
+    fi
+    {{~ end ~}}
+   
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:cache_save_section\r\e[0K\e[0m"
