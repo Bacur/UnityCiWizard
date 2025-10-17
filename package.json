@@ -2,7 +2,7 @@
   "name": "com.utkaka.ci-wizard",
   "version": "2.0.10",
   "displayName": "CI Wizard",
-  "description": "Custom version of СiWizard with local cache on the server.\nEditor for generating CI configs. At the moment it supports only Gitlab CI\n2.0.10:\n-Aded explicit error display protected brunch\n2.0.9:\n-Add local cache\n-Add groped logs in ci",
+  "description": "Custom version of СiWizard with local cache on the server.\nEditor for generating CI configs. At the moment it supports only Gitlab CI\n2.0.10:\nAded explicit error display protected brunch\n2.0.9:\nAdd local cache\nAdd grouped logs in ci",
   "unity": "2020.1",
   "unityRelease": "1f1",
   "author": {
