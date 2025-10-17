@@ -1,4 +1,5 @@
-before_script:    
+before_script:
+  - *check-environment-variables
   - |-    
     echo -e "\e[96m\e[0Ksection_start:`date +%s`:cache_restore_section[collapsed=true]\r\e[0KCache restore\e[0m"   
 
@@ -26,6 +27,10 @@ before_script:
     echo -e "\e[96m\e[0Ksection_end:`date +%s`:cache_restore_section\r\e[0K\e[0m"
 after_script:
   - |-
+    if [ "$CI_JOB_STATUS" != "success" ]; then
+      exit 0
+    fi
+
     echo -e "\e[96m\e[0Ksection_start:`date +%s`:cache_save_section[collapsed=true]\r\e[0KCache save\e[0m"   
 
     echo -e "\e[96m\e[0Ksection_start:`date +%s`:cache_save_set_project_path_section[collapsed=true]\r\e[0Kset_project_path\e[0m"  
@@ -57,3 +62,4 @@ after_script:
     {{~ end ~}}
    
     echo -e "\e[96m\e[0Ksection_end:`date +%s`:cache_save_section\r\e[0K\e[0m"
+  - *unity-after-cleanup
