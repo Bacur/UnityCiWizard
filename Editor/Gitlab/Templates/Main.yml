@@ -10,27 +10,37 @@ variables:
   
 .check-environment-variables: &check-environment-variables
   - |-
+    unset CI_VAR_FAILURE_MESSAGE
+    CI_VAR_FAILURE_CODE=1
+    trap 'status=$?; if [ "$status" -eq "$CI_VAR_FAILURE_CODE" ] && [ -n "$CI_VAR_FAILURE_MESSAGE" ]; then echo -e "\e[31mERROR: $CI_VAR_FAILURE_MESSAGE\e[0m" >&2; fi' EXIT
+
+    if [ "${CI_COMMIT_REF_PROTECTED}" != "true" ]; then
+      CI_VAR_FAILURE_MESSAGE="Current branch is not protected. Configure the branch as protected in GitLab."
+      exit $CI_VAR_FAILURE_CODE
+    fi
     echo -e "\e[96m\e[0Ksection_start:`date +%s`:check-environment-variables_section[collapsed=true]\r\e[0Kcheck-environment-variables\e[0m"  
     if [ -z "${UCI_ENV_UNITY_HUB_COMMAND}" ]; then
-      echo "Variable UCI_ENV_UNITY_HUB_COMMAND is not set or empty"
-      exit 1
+      CI_VAR_FAILURE_MESSAGE="Variable UCI_ENV_UNITY_HUB_COMMAND is not set or empty"
+      exit $CI_VAR_FAILURE_CODE
     fi
     if [ -z "${UCI_ENV_UNITY_EXECUTABLE+set}" ]; then
-      echo "Variable UCI_ENV_UNITY_EXECUTABLE is not set"
-      exit 1
+      CI_VAR_FAILURE_MESSAGE="Variable UCI_ENV_UNITY_EXECUTABLE is not set"
+      exit $CI_VAR_FAILURE_CODE
     fi
     if [ -z "${UCI_ENV_UNITY_USERNAME}" ]; then
-      echo "Variable UCI_ENV_UNITY_USERNAME is not set or empty"
-      exit 1
+      CI_VAR_FAILURE_MESSAGE="Variable UCI_ENV_UNITY_USERNAME is not set or empty"
+      exit $CI_VAR_FAILURE_CODE
     fi
     if [ -z "${UCI_ENV_UNITY_PASSWORD}" ]; then
-      echo "Variable UCI_ENV_UNITY_PASSWORD is not set or empty"
-      exit 1
+      CI_VAR_FAILURE_MESSAGE="Variable UCI_ENV_UNITY_PASSWORD is not set or empty"
+      exit $CI_VAR_FAILURE_CODE
     fi
     if [ -z "${UCI_ENV_UNITY_SERIAL}" ]; then
-      echo "Variable UCI_ENV_UNITY_SERIAL is not set or empty"
-      exit 1
+      CI_VAR_FAILURE_MESSAGE="Variable UCI_ENV_UNITY_SERIAL is not set or empty"
+      exit $CI_VAR_FAILURE_CODE
     fi
+    trap - EXIT
+    unset CI_VAR_FAILURE_MESSAGE CI_VAR_FAILURE_CODE
     echo -e "\e[96m\e[0Ksection_end:`date +%s`:check-environment-variables_section\r\e[0K\e[0m"
 
 .set_project_path: &set_project_path
@@ -149,16 +159,24 @@ variables:
     UCI_VAR_UNITY_BATCH_MODE_ARGUMENTS="${UCI_VAR_UNITY_BATCH_MODE_ARGUMENTS} -quit -executeMethod CiWizard.Editor.CiConfig.Execute"
     echo -e "\e[96m\e[0Ksection_end:`date +%s`:unity-apply-job-call-arguments_section\r\e[0K\e[0m"
 
+.unity-after-cleanup: &unity-after-cleanup |-
+    if [ "$CI_JOB_STATUS" != "success" ]; then
+      exit 0
+    fi
+    LICENSE_FILE="/tmp/unity_license/license_job_$CI_JOB_ID"
+    if [ -f "$LICENSE_FILE" ]; then
+      rm "$LICENSE_FILE"
+    fi
+    UCI_VAR_LICENSE_TMP_COUNT=$(find /tmp/unity_license -type f -name "license_job_*" | wc -l | tr -d ' ')
+    echo "Processes using license: $UCI_VAR_LICENSE_TMP_COUNT"
+    if [[ $UCI_VAR_LICENSE_TMP_COUNT == 0 ]]; then
+      echo "Return license"
+      "$UCI_VAR_UNITY_EDITOR_PATH""$UCI_ENV_UNITY_EXECUTABLE" -quit -batchmode -username ${UCI_ENV_UNITY_USERNAME} -password ${UCI_ENV_UNITY_PASSWORD} -returnlicense -logFile -
+    fi
+
 .unity: &unity
   after_script:
-    - |-
-      rm "/tmp/unity_license/license_job_$CI_JOB_ID"
-      UCI_VAR_LICENSE_TMP_COUNT=$(find /tmp/unity_license -type f -name "license_job_*" | wc -l | tr -d ' ')
-      echo "Processes using license: $UCI_VAR_LICENSE_TMP_COUNT"
-      if [[ $UCI_VAR_LICENSE_TMP_COUNT == 0 ]]; then
-        echo "Return license"
-        "$UCI_VAR_UNITY_EDITOR_PATH""$UCI_ENV_UNITY_EXECUTABLE" -quit -batchmode -username ${UCI_ENV_UNITY_USERNAME} -password ${UCI_ENV_UNITY_PASSWORD} -returnlicense -logFile -
-      fi
+    - *unity-after-cleanup
 
 {{~ for job in jobs ~}}
 {{include job.template_file_name}}

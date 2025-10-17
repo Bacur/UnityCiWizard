@@ -8,7 +8,6 @@
     UCI_CFG_JOB_UNITY_INDEX: "{{for.index}}"
   script:                  
     - *unity-import-section-start
-    - *check-environment-variables
     - *unity-get-project-version
     - *unity-check-install-editor
     - *unity-check-install-modules
