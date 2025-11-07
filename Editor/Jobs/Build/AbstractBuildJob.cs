@@ -59,6 +59,8 @@ namespace CiWizard.Editor.Jobs.Build
             BuildLogHandler.WriteSectionBegin("run_Build_Postprocessors", "[Ci Job] Run Build Postprocessors");
             RunBuildPostprocessors(buildPlayerOptions, report);
             BuildLogHandler.WriteSectionEnd("run_Build_Postprocessors");
+
+            PlayerSettings.Android.splitApplicationBinary = false;
         }
 
         public static void ReimportZenjectAssets()
