@@ -1,10 +1,8 @@
 {
   "name": "com.utkaka.ci-wizard",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "displayName": "CI Wizard",
-  "description": "Custom version of СiWizard with local cache on the server.\nEditor for generating CI configs. At the moment it supports only Gitlab CI\n\n2.0.10:\nAdded explicit error display protected brunch\n\n2.0.9:\nAdd local cache\nAdd grouped logs in ci",
-  "unity": "2020.1",
-  "unityRelease": "1f1",
+  "description": "Custom version of СiWizard with local cache on the server.\nEditor for generating CI configs. At the moment it supports only Gitlab CI\n\n2.0.11:\nAdd split Application Binary settings in aab\n\n2.0.10:\nAdded explicit error display protected brunch\n\n2.0.9:\nAdd local cache\nAdd grouped logs in ci",
   "author": {
     "name": "Anton Alexeyev",
     "email": "alexeyev.anton@gmail.com"
