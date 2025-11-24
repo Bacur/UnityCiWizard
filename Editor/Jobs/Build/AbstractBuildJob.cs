@@ -60,7 +60,7 @@ namespace CiWizard.Editor.Jobs.Build
             RunBuildPostprocessors(buildPlayerOptions, report);
             BuildLogHandler.WriteSectionEnd("run_Build_Postprocessors");
 
-            PlayerSettings.Android.splitApplicationBinary = false;
+            SplitApplicationBinary(true);
         }
 
         public static void ReimportZenjectAssets()
@@ -85,6 +85,15 @@ namespace CiWizard.Editor.Jobs.Build
                 AssetDatabase.StopAssetEditing();
                 AssetDatabase.Refresh();
             }
+        }
+
+        protected void SplitApplicationBinary(bool isActive)
+        {
+#if UNITY_6000_0_OR_NEWER
+            PlayerSettings.Android.splitApplicationBinary = isActive;
+#else
+            PlayerSettings.Android.useAPKExpansionFiles = isActive;
+#endif
         }
 
         protected virtual BuildPlayerOptions ConstructBuildOptions()

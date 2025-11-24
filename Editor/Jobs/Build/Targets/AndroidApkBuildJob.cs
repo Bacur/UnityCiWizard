@@ -26,7 +26,7 @@ namespace CiWizard.Editor.Jobs.Build.Targets
 
             EditorUserBuildSettings.buildAppBundle = false;
             PlayerSettings.Android.useCustomKeystore = true;
-            PlayerSettings.Android.splitApplicationBinary = false;
+            SplitApplicationBinary(false);
 
             if (_keyStore == "")
             {

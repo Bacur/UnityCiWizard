@@ -16,7 +16,7 @@ namespace CiWizard.Editor.Jobs.Build.Targets
             var buildOptions = base.ConstructBuildOptions();
 
             EditorUserBuildSettings.buildAppBundle = true;
-            PlayerSettings.Android.splitApplicationBinary = _splitApplicationBinary;
+            SplitApplicationBinary(_splitApplicationBinary);
 
             return buildOptions;
         }
