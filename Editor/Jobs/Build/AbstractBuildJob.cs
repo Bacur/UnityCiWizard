@@ -37,6 +37,12 @@ namespace CiWizard.Editor.Jobs.Build
 
         public override void Execute()
         {
+            if(!HasActiveScenes())
+            {
+                Debug.LogException(new Exception("Not finded active scene in project !!!!!!!!!!!"));
+                return;
+            }
+
             var buildPlayerOptions = ConstructBuildOptions();
 
             BuildLogHandler.WriteSectionBegin("run_Build_Preprocessors", "[Ci Job] Run Build Preprocessors");
@@ -85,6 +91,17 @@ namespace CiWizard.Editor.Jobs.Build
                 AssetDatabase.StopAssetEditing();
                 AssetDatabase.Refresh();
             }
+        }
+
+        public static bool HasActiveScenes()
+        {
+            foreach (var scene in EditorBuildSettings.scenes)
+            {
+                if (scene.enabled)
+                    return true;
+            }
+
+            return false;
         }
 
         protected void SplitApplicationBinary(bool isActive)
