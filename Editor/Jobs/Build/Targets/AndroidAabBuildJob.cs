@@ -1,6 +1,11 @@
 using UnityEditor;
 using UnityEngine;
 
+#if UNITY_ANDROID
+using UnityEditor.Android;
+using Unity.Android.Types;
+#endif
+
 namespace CiWizard.Editor.Jobs.Build.Targets
 {
     [CreateAssetMenu(fileName = "AndroidAAB", menuName = "CI/Jobs/Build/Android AAB")]
@@ -13,6 +18,15 @@ namespace CiWizard.Editor.Jobs.Build.Targets
 
         protected override BuildPlayerOptions ConstructBuildOptions()
         {
+#if UNITY_ANDROID
+#if UNITY_6000_0_OR_NEWER
+            UserBuildSettings.DebugSymbols.format = DebugSymbolFormat.Zip;
+            UserBuildSettings.DebugSymbols.level = DebugSymbolLevel.SymbolTable;
+#else
+            // ƒл€ старых Unity (2021Ц2023)
+            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
+#endif
+#endif
             var buildOptions = base.ConstructBuildOptions();
 
             EditorUserBuildSettings.buildAppBundle = true;

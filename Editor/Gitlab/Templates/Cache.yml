@@ -23,8 +23,22 @@ before_script:
       cp -r "${UCI_VAR_CACHE_FOLDER}/"* "$UCI_VAR_UNITY_FULL_PROJECT_PATH/{{path~}}"/
     fi
     {{~ end ~}}
-
+    
     echo -e "\e[96m\e[0Ksection_end:`date +%s`:cache_restore_section\r\e[0K\e[0m"
+    
+    echo -e "\e[96m\e[0Ksection_start:`date +%s`:cache_exclude_clear_section[collapsed=true]\r\e[0KClear excluded cache from project\e[0m"
+
+    {{~ for path in job.cache.exclude ~}}
+    PROJECT_FOLDER_TO_DELETE="$UCI_VAR_UNITY_FULL_PROJECT_PATH/{{path~}}"
+
+    if [ -d "$PROJECT_FOLDER_TO_DELETE" ]; then
+      echo "Removing excluded cache from project: $PROJECT_FOLDER_TO_DELETE"
+      rm -rf "$PROJECT_FOLDER_TO_DELETE"
+    fi
+    {{~ end ~}}
+
+    echo -e "\e[96m\e[0Ksection_end:`date +%s`:cache_exclude_clear_section\r\e[0K\e[0m"
+    
 after_script:
   - |-
     if [ "$CI_JOB_STATUS" != "success" ]; then
