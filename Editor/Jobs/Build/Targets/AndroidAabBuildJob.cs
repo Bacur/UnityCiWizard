@@ -23,8 +23,8 @@ namespace CiWizard.Editor.Jobs.Build.Targets
             UserBuildSettings.DebugSymbols.format = DebugSymbolFormat.Zip;
             UserBuildSettings.DebugSymbols.level = DebugSymbolLevel.SymbolTable;
 #else
-            // ƒл€ старых Unity (2021Ц2023)
-            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
+            // Old version Unity (2021 - 2023)
+            EditorUserBuildSettings.androidCreateSymbols = UnityEditor.AndroidCreateSymbols.Public;
 #endif
 #endif
             var buildOptions = base.ConstructBuildOptions();
